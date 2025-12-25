@@ -40,7 +40,7 @@ def search_libraries(book_name):
                     count_match = re.findall(r'\d+', "".join(nodes))
                     count = int(count_match[0]) if count_match else 0
                 
-                display = f"[{count}권 발견]({search_url})" if count > 0 else "없음"
+                display = f"[{count}권]({search_url})" if count > 0 else "없음"
             else:
                 display = "접속지연"
         except:
