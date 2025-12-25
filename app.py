@@ -41,7 +41,7 @@ def search_books(book_name):
                     count = int(count_match[0]) if count_match else 0
                     result_display = f"[{count}권 발견]({search_url})" if count > 0 else "없음"
                 else:
-                    result_display = "검색실패"
+                    result_display = "0권 발견"
             else:
                 result_display = "접속불가"
         except:
