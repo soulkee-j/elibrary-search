@@ -46,23 +46,21 @@ def search_books(book_name):
                 result_display = "접속불가"
         except:
             result_display = "에러발생"
-            
         results.append({"도서관": lib['name'], "결과": result_display})
-            
     progress_bar.empty()
     return results
 
 # 화면 구성
 st.title("📚 도서관 통합 검색기")
-st.write("책 제목을 입력하고 **엔터(Enter)**를 누르세요.")
-st.markdown("---")
+st.write("책 제목을 입력하고 **엔터**를 누르거나 **검색** 버튼을 클릭하세요.")
 
-# [중요 변경 포인트] 
-# text_input에 값이 들어오고 엔터를 치면 'keyword' 변수에 값이 할당되면서 아래 코드가 즉시 실행됩니다.
-keyword = st.text_input("책 제목을 입력하세요", placeholder="예: 행복의 기원")
+# [중요] 폼(Form)을 사용하면 엔터키가 자동으로 버튼 클릭으로 연결됩니다.
+with st.form(key='search_form'):
+    keyword = st.text_input("책 제목을 입력하세요", placeholder="예: 행복의 기원")
+    submit_button = st.form_submit_button(label='검색 시작')
 
-# keyword에 값이 있을 때만 검색 실행 (엔터를 치면 실행됨)
-if keyword:
+# 검색 버튼이 눌리거나 엔터가 입력되었을 때 실행
+if submit_button and keyword:
     with st.spinner(f"'{keyword}' 검색 중..."):
         res = search_books(keyword)
         
@@ -75,3 +73,5 @@ if keyword:
             c1, c2 = st.columns([2, 1])
             c1.write(item["도서관"])
             c2.markdown(item["결과"])
+elif submit_button and not keyword:
+    st.warning("검색어를 입력해주세요.")
