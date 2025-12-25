@@ -55,7 +55,11 @@ def search_libraries(book_name):
 st.title("📚 통합 전자도서관 검색")
 st.markdown("---")
 
-keyword = st.text_input("책 제목을 입력하세요", placeholder="예: 행복의 기원", key="search_input")
+query_params = st.query_params
+url_keyword = query_params.get("search", "")
+keyword = st.text_input("책 제목을 입력하세요", value=url_keyword, placeholder="예: 행복의 기원", key="search_input")
+if url_keyword and not st.session_state.get('searched'):
+    st.session_state['searched'] = True
 
 if keyword:
     with st.spinner(f"'{keyword}' 검색 중..."):
