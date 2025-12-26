@@ -49,6 +49,7 @@ def search_libraries(book_name):
     # 직접 확인 도서관 추가
     encoded_utf8 = quote(book_name.encode("utf-8"))
     direct_links = [
+        {"name": "divider", "link": None, "status": None},  # 구분선 역할을 할 특수 데이터
         {"name": "서울시", "link": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}", "status": "링크 확인"},
         {"name": "서초구", "link": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}", "status": "링크 확인"},
         {"name": "부천시", "link": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001", "status": "링크 확인"}
