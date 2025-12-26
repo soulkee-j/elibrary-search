@@ -71,15 +71,20 @@ if keyword:
     with st.spinner(f"'{keyword}' 검색 중..."):
         res = search_libraries(keyword)
         
-        # HTML 테이블 생성 (모바일에서도 가로 레이아웃 유지)
-        table_html = """
+        # 1. CSS 스타일 정의
+        style = """
         <style>
-            .lib-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            .lib-table th { text-align: left; border-bottom: 2px solid #ddd; padding: 10px; font-size: 16px; }
-            .lib-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 15px; }
-            .lib-name { width: 60%; font-weight: bold; }
-            .lib-res { width: 40%; text-align: right; }
+            .lib-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+            .lib-table th { text-align: left; border-bottom: 2px solid #ddd; padding: 12px 8px; font-size: 16px; background-color: #f8f9fa; }
+            .lib-table td { padding: 12px 8px; border-bottom: 1px solid #eee; font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
+            .lib-name { width: 55%; font-weight: bold; color: #333; }
+            .lib-res { width: 45%; text-align: right; }
+            a { font-weight: bold; }
         </style>
+        """
+        
+        # 2. 테이블 헤더 생성
+        table_html = style + """
         <table class="lib-table">
             <thead>
                 <tr>
@@ -90,6 +95,7 @@ if keyword:
             <tbody>
         """
         
+        # 3. 데이터 행 생성
         for item in res:
             table_html += f"""
                 <tr>
@@ -100,5 +106,5 @@ if keyword:
         
         table_html += "</tbody></table>"
         
-        # HTML 렌더링
-        st.write(table_html, unsafe_allow_html=True)
+        # 4. 출력 (st.write 대신 st.markdown 사용)
+        st.markdown(table_html, unsafe_allow_html=True)
