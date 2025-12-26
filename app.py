@@ -42,10 +42,47 @@ def search_libraries(book_name):
                     count_match = re.findall(r'\d+', "".join(nodes))
                     count = int(count_match[0]) if count_match else 0
             
-            display = f"{count}권" if count > 0 else "없음"
-            results.append({"도서관 이름": lib['name'], "소장 현황": search_url, "텍스트": display})
+            display = f"{count}권 (클릭)" if count > 0 else "없음"
+            results.append({"도서관 이름": lib['name'], "소장 현황": search_url})
         except:
-            results.append({"도서관 이름": lib['name'], "소장 현황": "#", "텍스트": "확인불가"})
+            results.append({"도서관 이름": lib['name'], "소장 현황": "#"})
 
     # 직접 확인 도서관 추가
-    encoded_utf8
+    encoded_utf8 = quote(book_name.encode("utf-8"))
+    direct_links = [
+        {"도서관 이름": "서울도서관", "소장 현황": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}"},
+        {"도서관 이름": "서초구", "소장 현황": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}"},
+        {"도서관 이름": "부천시", "소장 현황": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001"}
+    ]
+    results.extend(direct_links)
+    
+    progress_bar.empty()
+    return results
+
+# 4. 화면 구성
+st.title("📚 전자도서관 통합검색")
+st.write("제목 입력 후 엔터(Enter)를 누르세요.")
+st.markdown("---")
+
+# URL 파라미터 읽기
+url_keyword = st.query_params.get("search", "")
+
+# 입력창
+keyword = st.text_input("책 제목을 입력하세요", value=url_keyword, placeholder="예: 행복의 기원", key="search_input")
+
+# 5. 검색 실행 및 결과 출력
+if keyword:
+    with st.spinner(f"'{keyword}' 검색 중..."):
+        raw_data = search_libraries(keyword)
+        df = pd.DataFrame(raw_data)
+        
+        # [최종 해결책] 가장 안정적인 데이터프레임 출력 방식
+        st.dataframe(
+            df,
+            column_config={
+                "도서관 이름": st.column_config.TextColumn("도서관 이름", width="medium"),
+                "소장 현황": st.column_config.LinkColumn("소장 현황(클릭 이동)", width="large")
+            },
+            hide_index=True,
+            use_container_width=True
+        )
