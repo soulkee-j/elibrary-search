@@ -58,7 +58,7 @@ def search_libraries(book_name):
     ]
     
     for item in direct_links:
-        results.append({"도서관": item["도서관"], "결과": f"[직접 방문확인]({item['url']})"})
+        results.append({"도서관": item["도서관"], "결과": f"[링크 확인]({item['url']})"})
 
     progress_bar.empty()
     return results
@@ -81,7 +81,7 @@ if keyword:
         
         col1, col2 = st.columns([2, 1])
         col1.write("**도서관 이름**")
-        col2.write("**소장 현황 (클릭 시 이동)**")
+        col2.write("**소장 현황**")
         st.divider()
 
         for item in res:
