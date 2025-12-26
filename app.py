@@ -52,9 +52,9 @@ def search_libraries(book_name):
     encoded_utf8 = quote(book_name.encode("utf-8"))
     
     direct_links = [
-        {"도서관": "서울도서관", "url": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}"},
-        {"도서관": "서초구 전자도서관", "url": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}"},
-        {"도서관": "부천시립도서관", "url": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001"}
+        {"도서관": "서울시", "url": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}"},
+        {"도서관": "서초구", "url": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}"},
+        {"도서관": "부천시", "url": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001"}
     ]
     
     for item in direct_links:
