@@ -42,17 +42,18 @@ def search_libraries(book_name):
                     count_match = re.findall(r'\d+', "".join(nodes))
                     count = int(count_match[0]) if count_match else 0
             
-            display = f"{count}권 (클릭)" if count > 0 else "없음"
-            results.append({"도서관 이름": lib['name'], "소장 현황": search_url})
+            # 표에 표시할 텍스트 결정
+            status_text = f"{count}권" if count > 0 else "없음"
+            results.append({"도서관 이름": lib['name'], "링크": search_url, "소장 현황": status_text})
         except:
-            results.append({"도서관 이름": lib['name'], "소장 현황": "#"})
+            results.append({"도서관 이름": lib['name'], "링크": "#", "소장 현황": "확인불가"})
 
     # 직접 확인 도서관 추가
     encoded_utf8 = quote(book_name.encode("utf-8"))
     direct_links = [
-        {"도서관 이름": "서울도서관", "소장 현황": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}"},
-        {"도서관 이름": "서초구", "소장 현황": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}"},
-        {"도서관 이름": "부천시", "소장 현황": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001"}
+        {"도서관 이름": "서울도서관", "링크": f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_utf8}", "소장 현황": "링크 확인"},
+        {"도서관 이름": "서초구", "링크": f"https://e-book.seocholib.or.kr/search?keyword={encoded_utf8}", "소장 현황": "링크 확인"},
+        {"도서관 이름": "부천시", "링크": f"https://ebook.bcl.go.kr:444/elibrary-front/search/searchList.ink?schTxt={encoded_utf8}&schClst=ctts%2Cautr&schDvsn=001", "소장 현황": "링크 확인"}
     ]
     results.extend(direct_links)
     
@@ -76,13 +77,20 @@ if keyword:
         raw_data = search_libraries(keyword)
         df = pd.DataFrame(raw_data)
         
-        # [최종 해결책] 가장 안정적인 데이터프레임 출력 방식
+        # [핵심] 2컬럼 레이아웃 구현
         st.dataframe(
             df,
             column_config={
                 "도서관 이름": st.column_config.TextColumn("도서관 이름", width="medium"),
-                "소장 현황": st.column_config.LinkColumn("소장 현황(클릭 이동)", width="large")
+                "소장 현황": st.column_config.LinkColumn(
+                    "소장 현황", 
+                    width="small",
+                    # '링크' 컬럼에 있는 URL을 사용하되, 화면에는 '소장 현황' 컬럼의 텍스트를 표시함
+                    display_text=r"^.*$", # 셀의 텍스트를 그대로 링크 텍스트로 사용하라는 정규식
+                ),
+                "링크": None # URL 컬럼은 데이터 소스로만 쓰고 화면에선 숨김
             },
+            column_order=("도서관 이름", "소장 현황"),
             hide_index=True,
             use_container_width=True
         )
