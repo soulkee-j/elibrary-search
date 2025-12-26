@@ -58,7 +58,7 @@ def search_libraries(book_name):
     ]
     
     for item in direct_links:
-        results.append({"도서관": item["도서관"], "결과": f"[링크 확인]({item['url']})"})
+        results.append({"도서관": item["도서관"], "결과": f"[링크 확인필요]({item['url']})"})
 
     progress_bar.empty()
     return results
