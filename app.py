@@ -83,7 +83,7 @@ if keyword:
         """
         for item in data:
             html_code += f"""
-                <tr style="border-bottom: 1px solid #eee;">
+                <tr style="">
                     <td style="padding: 12px; font-weight: bold; color: #333;">{item['name']}</td>
                     <td style="padding: 12px; text-align: right;">
                         <a href="{item['link']}" target="_blank" style="color: #007bff; text-decoration: none; font-weight: bold;">{item['status']}</a>
