@@ -31,20 +31,22 @@ def search_libraries(book_name):
         try:
             encoded_query = quote(book_name.encode(lib["encoding"]))
             
-            # --- 서울도서관 API 전용 로직 (최종 수정본 반영) ---
+            # --- 서울도서관 API 전용 로직 ---
             if lib["type"] == "seoul_api":
                 if not SEOUL_API_KEY:
                     results.append({"name": lib['name'], "link": "#", "status": "키 설정 필요"})
                     continue
                 
                 unique_books = {}
+                # [수정] 변수명을 encoded_query로 통일하고 타임아웃을 넉넉히 설정
                 search_urls = [
                     f"{lib['url']}{SEOUL_API_KEY}/json/SeoulLibraryBookSearchInfo/1/500/{encoded_query}/%20/%20/%20/%20",
-                    f"{lib['url']}{SEOUL_API_KEY}/json/SeoulLibraryBookSearchInfo/1/500/%20/{encoded_keyword}/%20/%20/%20"
+                    f"{lib['url']}{SEOUL_API_KEY}/json/SeoulLibraryBookSearchInfo/1/500/%20/{encoded_query}/%20/%20/%20"
                 ]
                 
                 for url in search_urls:
-                    resp = requests.get(url, timeout=10)
+                    # 데이터 양이 많으므로 timeout을 15초로 늘림
+                    resp = requests.get(url, timeout=15)
                     if resp.status_code == 200:
                         data = resp.json()
                         if "SeoulLibraryBookSearchInfo" in data:
@@ -60,27 +62,17 @@ def search_libraries(book_name):
                 web_link = f"https://elib.seoul.go.kr/contents/search/content?t=EB&k={encoded_query}"
                 results.append({"name": lib['name'], "link": web_link, "status": display})
 
-            # --- 강남구 전용 로직 ---
-            elif lib["type"] == "gangnam":
-                search_url = (
-                    f"{lib['url']}?scon1=TITLE&sarg1={encoded_query}"
-                    f"&sopr2=OR&scon2=AUTHOR&sarg2={encoded_query}"
-                )
-                resp = requests.get(search_url, timeout=5)
-                count = 0
-                if resp.status_code == 200:
-                    tree = html.fromstring(resp.content)
-                    nodes = tree.xpath(lib["xpath"])
-                    if nodes:
-                        count_match = re.findall(r'\d+', "".join(nodes))
-                        count = int(count_match[0]) if count_match else 0
-                display = f"{count}권" if count > 0 else "없음"
-                results.append({"name": lib['name'], "link": search_url, "status": display})
-
-            # --- 일반 도서관 (.ink 방식) ---
+            # --- 강남구 및 일반 도서관 로직 (동일) ---
             else:
-                search_url = f"{lib['url']}?{lib['key_param']}={encoded_query}&schClst=ctts%2Cautr&schDvsn=001"
-                resp = requests.get(search_url, timeout=5)
+                if lib["type"] == "gangnam":
+                    search_url = (
+                        f"{lib['url']}?scon1=TITLE&sarg1={encoded_query}"
+                        f"&sopr2=OR&scon2=AUTHOR&sarg2={encoded_query}"
+                    )
+                else:
+                    search_url = f"{lib['url']}?{lib['key_param']}={encoded_query}&schClst=ctts%2Cautr&schDvsn=001"
+                
+                resp = requests.get(search_url, timeout=7)
                 count = 0
                 if resp.status_code == 200:
                     tree = html.fromstring(resp.content)
@@ -88,13 +80,15 @@ def search_libraries(book_name):
                     if nodes:
                         count_match = re.findall(r'\d+', "".join(nodes))
                         count = int(count_match[0]) if count_match else 0
+                
                 display = f"{count}권" if count > 0 else "없음"
                 results.append({"name": lib['name'], "link": search_url, "status": display})
 
-        except:
+        except Exception as e:
+            # 에러 발생 시 로그를 남기지 않고 확인불가로 표시
             results.append({"name": lib['name'], "link": "#", "status": "확인불가"})
 
-    # 직접 확인 도서관 추가 (서울도서관은 이제 위에서 검색되므로 제외)
+    # 직접 확인 도서관 추가
     encoded_utf8 = quote(book_name.encode("utf-8"))
     direct_links = [
         {"name": " ", "link": None, "status": ""},
@@ -105,12 +99,9 @@ def search_libraries(book_name):
     progress_bar.empty()
     return results
 
-# --- 화면 구성 ---
+# --- 화면 구성 및 HTML 출력 부분 (동일) ---
 st.markdown('<h2 style="font-size:24px; margin-top:-50px; margin-bottom:10px;">📚 전자도서관 통합검색</h2>', unsafe_allow_html=True)
-url_params = st.query_params
-url_keyword = url_params.get("search", "")
-
-keyword = st.text_input("책 제목을 입력하세요", value=url_keyword, placeholder="예: 행복의 기원", key="search_input")
+keyword = st.text_input("책 제목을 입력하세요", placeholder="예: 행복의 기원", key="search_input")
 
 if keyword:
     with st.spinner(f"'{keyword}' 검색 중..."):
@@ -128,7 +119,6 @@ if keyword:
                 <tbody>
         """
         for item in data:
-            # 링크가 없는 구분선 행 처리
             if item['link'] is None:
                 html_code += f"""
                     <tr style="background-color: #f1f3f5;">
@@ -145,5 +135,4 @@ if keyword:
                     </tr>
                 """
         html_code += "</tbody></table></div>"
-        
         st.components.v1.html(html_code, height=len(data) * 52 + 60, scrolling=False)
