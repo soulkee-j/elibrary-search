@@ -105,7 +105,7 @@ if keyword:
         html_code = """
         <style>
             body {
-                color: var(--text-color, #31333F); /* Streamlit 기본 텍스트색 상속 */
+                color: var(--text-color, #808080); /* Streamlit 기본 텍스트색 상속 */
                 font-family: "Source Sans Pro", sans-serif;
                 margin: 0;
             }
