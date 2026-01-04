@@ -101,57 +101,63 @@ if keyword:
     with st.spinner(f"검색 중입니다..."):
         data = search_libraries(keyword)
         
-        # 시스템 테마에 맞춰 텍스트 색상이 자동 반전되는 HTML/CSS
+        # 도서관 명칭과 "없음"에 중간 회색을 적용한 최적화 CSS
         html_code = """
         <style>
             body {
-                color: var(--text-color, #808080); /* Streamlit 기본 텍스트색 상속 */
                 font-family: "Source Sans Pro", sans-serif;
                 margin: 0;
+                background-color: transparent;
             }
             .lib-table { 
                 width: 100%; 
                 border-collapse: collapse; 
             }
             .lib-table tr { 
-                border-bottom: 1px solid rgba(128, 128, 128, 0.2); 
+                border-bottom: 1px solid rgba(128, 128, 128, 0.3); 
             }
+            /* 헤더 스타일: 14px 유지 및 중간 회색 */
             .lib-table th { 
                 text-align: left; 
                 padding: 12px; 
-                font-size: 0.85rem;
-                opacity: 0.6;
+                font-size: 14px;
+                color: #808080;
+                font-weight: 600;
             }
             .lib-table td { 
                 padding: 14px 12px; 
-                font-size: 1rem;
-                color: inherit; 
+                font-size: 14px;
             }
-            /* 링크 스타일 */
+            /* 도서관 명칭: 다크/라이트 공통 중간 회색 고정 */
+            .lib-name {
+                color: #808080;
+                font-weight: 500;
+            }
             .status-link { 
-                font-weight: bold; 
                 text-decoration: none; 
             }
-            /* 권수가 있을 때: 강조색(파란색) */
+            /* 1권 이상: 파란색 + 볼드체 */
             .status-exist { 
                 color: #007bff; 
+                font-weight: bold;
             }
-            /* 권수가 없을 때: 현재 텍스트색 유지 + 흐리게 + 링크 유지 */
+            /* 없음/확인불가: 중간 회색 유지 + 링크 유지 */
             .status-none { 
-                color: inherit; 
-                opacity: 0.4; 
+                color: #808080; 
                 font-weight: normal;
             }
         </style>
         <table class="lib-table">
             <thead>
-                <tr><th>도서관</th><th style="text-align:right;">현황</th></tr>
+                <tr>
+                    <th>도서관</th>
+                    <th style="text-align:right;">현황</th>
+                </tr>
             </thead>
             <tbody>
         """
         
         for item in data:
-            # 기본적으로 모든 상태에 링크를 적용
             if item['count'] > 0:
                 status_class = "status-exist"
                 status_text = f"{item['count']}권"
@@ -162,17 +168,17 @@ if keyword:
                 status_class = "status-none"
                 status_text = "확인불가"
             
-            # 현황이 "없음"이어도 item['link']를 사용하여 <a> 태그 유지
+            # 현황 텍스트에 링크 적용
             status_html = f"<a href='{item['link']}' target='_blank' class='status-link {status_class}'>{status_text}</a>"
                 
             html_code += f"""
                 <tr>
-                    <td style="font-weight:600;">{item['name']}</td>
+                    <td class="lib-name">{item['name']}</td>
                     <td style="text-align:right;">{status_html}</td>
                 </tr>
             """
         
-        # 테이블 출력
+        # HTML 렌더링
         st.components.v1.html(html_code + "</tbody></table>", height=len(data) * 55 + 60)
         
         st.markdown("---")
