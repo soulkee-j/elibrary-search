@@ -120,6 +120,10 @@ def search_libraries(book_name):
     return results
 
 # --- 메인 UI ---
+# URL 파라미터 읽기 (예: ?search=노인과바다)
+query_params = st.query_params
+url_keyword = query_params.get("search", "")
+
 st.markdown('<h2 style="font-size:24px; margin-top:-50px;">📚 전자도서관 통합검색</h2>', unsafe_allow_html=True)
 keyword = st.text_input("책 제목 또는 저자를 입력하세요", placeholder="예: 노인과 바다")
 
